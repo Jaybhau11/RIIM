@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIBM Attendance system</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .container {
+            max-width: 600px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .summary {
+            max-width: 300px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+        button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        select, input {
+            padding: 10px;
+            font-size: 16px;
+        }
+        .login-form, .attendance-section, .students-list {
+            display: none;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        .present {
+            background-color: lightgreen;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>ATTENDANCE SYSTEM</h2>
+        <button id="adminBtn" onclick="showLoginForm('Admin')">Login as Admin</button>
+        <button id="facultyBtn" onclick="showLoginForm('Faculty')">Login as Faculty</button>
+        
+        <div class="login-form" id="loginForm">
+            <h3>Enter Credentials</h3>
+            <input type="text" id="username" placeholder="Enter Username">
+            <div>
+                <input type="password" id="password" placeholder="Enter Password">
+                <span onclick="togglePassword()"> </span>
+            </div>
+            <button onclick="login()">Login</button>
+        </div>
+        
+        <div class="attendance-section" id="attendanceSection">
+            <h3>Select Date</h3>
+            <input type="date" id="attendanceDate">
+            
+            <div class="dropdown-container">
+                <select id="classRoom" onchange="loadStudents()">
+                    <option value="">Select Class Room</option>
+                    <option value="M1">M1</option>
+                    <option value="M2">M2</option>
+                    <option value="E1">E1</option>
+                </select>
+
+                <select id="facultyName">
+                    <option value="teacher1">Teacher1</option>
+                    <option value="teacher2">Teacher2</option>
+                </select>
+                
+                <select id="timeSlot">
+                    <option value="8-9">8-9</option>
+                    <option value="9-10">9-10</option>
+                    <option value="10-11">10-11</option>
+                </select>
+                
+                <select id="subject">
+                    <option value="sub1">Sub1</option>
+                    <option value="sub2">Sub2</option>
+                    <option value="sub3">Sub3</option>
+                    <option value="sub4">Sub4</option>
+                </select>
+
+            </div>
+            
+            <div class="students-list" id="studentsList">
+                <h3>Student List</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sr. No.</th>
+                            <th>Student Name</th>
+                            <th>Mentor Name</th>
+                            <th>Attendance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody"></tbody>
+                </table>
+                <button onclick="downloadCSV()">Download CSV</button>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="summary" id="summarySection">
+        <h3>Summary</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Mentor Name</th>
+                    <th>Present Students</th>
+                    <th>Total Students</th>
+                </tr>
+            </thead>
+            <tbody id="summaryTableBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        document.getElementById("attendanceDate").valueAsDate = new Date();
+        let userType = "";
+
+        function showLoginForm(type) {
+            userType = type;
+            document.getElementById("loginForm").style.display = "block";
+        }
+
+        function togglePassword() {
+            var passwordField = document.getElementById("password");
+            passwordField.type = passwordField.type === "password" ? "text" : "password";
+        }
+
+        function login() {
+            var username = document.getElementById("username").value;
+            var password = document.getElementById("password").value;
+            
+            if ((userType === "Admin" && username === "Admin1" && password === "Pass@1") || 
+                (userType === "Faculty" && username === "Faculty1" && password === "Pass@1")) {
+                document.getElementById("attendanceSection").style.display = "block";
+                document.getElementById("loginForm").style.display = "none";
+                document.getElementById("adminBtn").style.display = "none";
+                document.getElementById("facultyBtn").style.display = "none";
+            } else {
+                alert("Invalid Credentials");
+            }
+        }
+
+        function loadStudents() {
+            let classRoom = document.getElementById("classRoom").value;
+            let students = {
+                "M1": [
+                    { name: "Alice", mentor: "Dr. Smith" },
+                    { name: "Bob", mentor: "Dr. Smith" },
+                    { name: "Charlie", mentor: "Dr. Smith" },
+                    { name: "Jay", mentor: "Prof. Pooja" },
+                    { name: "Deep", mentor: "Prof. Pooja" },
+                    { name: "Don", mentor: "Prof. Pooja" },
+                    { name: "Bhau", mentor: "Prof. Pooja" }
+                ],
+                "M2": [
+                    { name: "David", mentor: "Ms. Johnson" },
+                    { name: "Emma", mentor: "Ms. Johnson" },
+                    { name: "Frank", mentor: "Ms. Johnson" }
+                ],
+                "E1": [
+                    { name: "Grace", mentor: "Mr. Brown" },
+                    { name: "Hannah", mentor: "Mr. Brown" },
+                    { name: "Isaac", mentor: "Mr. Brown" }
+                ]
+            };
+            
+            if (students[classRoom]) {
+                document.getElementById("studentsList").style.display = "block";
+                let studentTable = document.getElementById("studentTableBody");
+                studentTable.innerHTML = "";
+                students[classRoom].forEach((student, index) => {
+                    let row = `<tr>
+                        <td>${index + 1}</td>
+                        <td>${student.name}</td>
+                        <td>${student.mentor}</td>
+                        <td><input type='checkbox' onchange='markAttendance(this)'></td>
+                    </tr>`;
+                    studentTable.innerHTML += row;
+                });
+            }
+        }
+
+        function markAttendance(checkbox) {
+            let row = checkbox.closest("tr");
+            row.classList.toggle("present", checkbox.checked);
+            updateSummary();
+        }
+
+        function updateSummary() {
+            let summaryTable = document.getElementById("summaryTableBody");
+            summaryTable.innerHTML = "";
+            let mentorCounts = {};
+
+            document.querySelectorAll("#studentTableBody tr").forEach(row => {
+                let mentor = row.cells[2].textContent;
+                let isPresent = row.cells[3].querySelector("input").checked;
+
+                if (!mentorCounts[mentor]) {
+                    mentorCounts[mentor] = { total: 0, present: 0 };
+                }
+
+                mentorCounts[mentor].total++;
+                if (isPresent) {
+                    mentorCounts[mentor].present++;
+                }
+            });
+
+            for (let mentor in mentorCounts) {
+                summaryTable.innerHTML += `<tr>
+                    <td>${mentor}</td>
+                    <td>${mentorCounts[mentor].present}</td>
+                    <td>${mentorCounts[mentor].total}</td>
+                </tr>`;
+            }
+        }
+        function downloadCSV() {
+            let csvContent = "data:text/csv;charset=utf-8, Sr No, Date, Time Slot, Student Name, Mentor Name, Class Room, Faculty Name, Subject, User Name, Time, Status\n";
+            let username = document.getElementById("username").value;
+            let timeSlot = document.getElementById("timeSlot").value;
+            let date = document.getElementById("attendanceDate").value;
+            let classRoom = document.getElementById("classRoom").value;
+            let facultyName = document.getElementById("facultyName").value;
+            let subject = document.getElementById("subject").value;
+            let fileName = `${date}_${classRoom}_${facultyName}.csv`;
+            document.querySelectorAll("#studentTableBody tr").forEach((row, index) => {
+                let studentName = row.cells[1].textContent;
+                let mentorName = row.cells[2].textContent;
+                let attendance = row.cells[3].querySelector("input").checked ? "Present" : "Absent";
+                let currentTime = new Date().toLocaleTimeString();
+
+                csvContent += `${index + 1}, ${date}, ${timeSlot}, ${studentName}, ${mentorName}, ${classRoom}, ${facultyName}, ${subject}, ${username}, ${currentTime}, ${attendance}\n`;
+            });
+
+            let encodedUri = encodeURI(csvContent);
+            let link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", fileName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
